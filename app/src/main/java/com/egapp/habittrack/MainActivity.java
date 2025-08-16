@@ -6,12 +6,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -26,10 +21,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-
         setContentView(R.layout.activity_main);
-
 
         auth = FirebaseAuth.getInstance();
         buttonLogout = findViewById(R.id.logout);
@@ -40,15 +32,18 @@ public class MainActivity extends AppCompatActivity {
         buttonStatistics = findViewById(R.id.home_statisticsButton);
         textViewUserName = findViewById(R.id.user_details);
         user = auth.getCurrentUser();
+
         if(user == null){
             Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
             startActivity(intent);
             finish();
-        }
+        }       //falls kein Nutzer eingeloggt ist wird man zum Login screen redirected
         else{
             textViewUserName.setText(user.getEmail());
-        }
+        }       //bei erfolgreichem Login wird die E-Mail des Nutzers angezeigt
 
+
+        //Die folgenden Buttons sind für die Navigation zu den jeweiligen Screens
         buttonLogout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

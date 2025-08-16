@@ -14,6 +14,9 @@ import java.util.Map;
 
 public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.ViewHolder> {
 
+    //Es werden für jeden Screen der einen RecyclerView mit individuellen Daten aus der DB mit jeweils verschiedenen Anzeigeoptionen anzeigt ein Adapter benötigt.
+    //Für dieses Projekt gibt es drei Adapter für drei RecyclerViews
+
     private Context context;
     private List<Habit> habitList;
 
@@ -35,7 +38,6 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
 
         holder.habitName.setText(habit.getName());
 
-        // completions = "2025-08-13" -> true
         Map<String, Boolean> completions = habit.getCompletions();
 
         int totalCompletions = 0;
@@ -47,7 +49,7 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
                     totalCompletions++;
                 } else {
                     totalMisses++;
-                }
+                }   //Dadurch das leere Einträge vorher in der HabitOverviewActivity von null auf false gesetzt wurden können hier die Einträge gezählt werden
             }
         }
 

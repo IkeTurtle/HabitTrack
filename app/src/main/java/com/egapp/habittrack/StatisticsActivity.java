@@ -68,12 +68,10 @@ public class StatisticsActivity extends AppCompatActivity {
                     .getReference("Users")
                     .child(uid)
                     .child("habits");
-        } else {
-            Toast.makeText(this, "No authenticated user", Toast.LENGTH_SHORT).show();
-            return;
-        }
+        }  // Wenn der Nutzer nicht leer ist (eingeloggt) werden hier die Daten zur aktuellen User-ID geladen
 
-        loadHabits();
+
+        loadHabits(); //Hier werden die Habits aus der Datenbank geladen und im Recyclerview angezeigt
 
 
         backIcon.setOnClickListener(new View.OnClickListener() {
@@ -100,7 +98,7 @@ public class StatisticsActivity extends AppCompatActivity {
         });
     }
 
-
+    //Hier folgt die Toolbar navigation zwischen den Screens, welche auf allen Screens außer Main angezeigt wird
     private void loadHabits() {
         if (statisticsDbReference != null) {
             statisticsDbReference.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -152,7 +150,6 @@ public class StatisticsActivity extends AppCompatActivity {
             return;
         }
 
-        // 1. Collect all dates where all habits were completed
         List<String> completedDates = new ArrayList<>();
         for (Habit habit : statisticsHabitList) {
             if (habit.getCompletions() != null) {
@@ -164,15 +161,15 @@ public class StatisticsActivity extends AppCompatActivity {
                     }
                 }
             }
-        }
+        } //Hier wird die Anzahl aller Tage gesammelt in denen der Nutzer alle Habits als completed gesetzt hat
 
-        // 2. Sort dates descending
-        Collections.sort(completedDates, Collections.reverseOrder());
+        Collections.sort(completedDates, Collections.reverseOrder()); //Hier werden die Tage absteigend sortiert
 
-        // 3. Count consecutive days starting from today
+
         int streak = 0;
         String today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
         Date currentDate = null;
+        //Hier wird die Anzahl der nachfolgenden Tage gezählt
 
         try {
             currentDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(today);
@@ -191,19 +188,20 @@ public class StatisticsActivity extends AppCompatActivity {
                     allCompleted = false;
                     break;
                 }
-            }
+            } //Für jeden Durchgang der Schleife erhöht sich der Counter der streak bis der allCompleted boolean nicht mehr war ist.
 
             if (!allCompleted) break;
 
             streak++;
-            // go to previous day
+
             long millis = currentDate.getTime();
-            currentDate = new Date(millis - 24 * 60 * 60 * 1000);
+            currentDate = new Date(millis - 24 * 60 * 60 * 1000); //Durdch diese beiden Zeiten wird der vorherige Tag geladen und zur Prüfung bereitgestellt
         }
 
         streakTitle.setText("Streak: " + streak + " days");
     }
 
+    //Hier folgt die Toolbar navigation zwischen den Screens, welche auf allen Screens außer Main angezeigt wird
     private void showMenu(View popUp){
         PopupMenu popupMenu = new PopupMenu(StatisticsActivity.this, popUp);
         popupMenu.getMenuInflater().inflate(R.menu.popupmenu, popupMenu.getMenu());

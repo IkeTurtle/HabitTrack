@@ -66,10 +66,11 @@ public class JournalActivity extends AppCompatActivity {
                     .getReference("Users")
                     .child(uid)
                     .child("journalEntries");}
+        // Wenn der Nutzer nicht leer ist (eingeloggt) werden hier die Daten zur aktuellen User-ID geladen
 
 
 
-            loadTodaysJournal();
+            loadTodaysJournal();    //Hier wird das Datum für das aktuelle Datum geladen
 
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -77,7 +78,7 @@ public class JournalActivity extends AppCompatActivity {
                   saveJournal();
                   Toast.makeText(JournalActivity.this, "Journal entry saved", Toast.LENGTH_SHORT).show();
                 }
-        });
+        }); //Speicherfunktion für Einträge
 
         viewAllButton.setOnClickListener((new View.OnClickListener() {
             @Override
@@ -95,14 +96,14 @@ public class JournalActivity extends AppCompatActivity {
                 );
                 datePicker.show();
             }
-        }));
+        })); //Hier wird mit Hilfe der DatePicker packages ein Pop-Up geöffnet mit dem der User andere Journaleinträge anzeigen kann
 
         deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 deleteEntry();
             }
-        });
+        }); //Löschen des aktuell geöffneten Eintrags
 
 
         backIcon.setOnClickListener(new View.OnClickListener() {
@@ -131,7 +132,7 @@ public class JournalActivity extends AppCompatActivity {
 
 
     private void loadTodaysJournal() {
-        String dateKey = java.time.LocalDate.now().toString();
+        String dateKey = java.time.LocalDate.now().toString(); //Laden der Systemzeit
         currentDateTitle.setText(dateKey);
         journalDbReference.child(dateKey).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -140,12 +141,12 @@ public class JournalActivity extends AppCompatActivity {
                     String text = snapshot.child("text").getValue(String.class);
                     journalEditText.setText(text);
                 }
-            }
+            } //Wenn sich das Datum durch das System ändert wird der angezeigt Eintrag angepasst
 
             @Override
             public void onCancelled(DatabaseError error) {
                 Log.e("JournalActivity", "Failed to load today's journal", error.toException());
-            }
+            }   //onCancelled wird per default vorrausgesetzt für onDataChange
         });
     }
         private void saveJournal() {
@@ -156,7 +157,7 @@ public class JournalActivity extends AppCompatActivity {
             }
 
             String dateKey = (selectedDate != null) ? selectedDate : java.time.LocalDate.now().toString();
-            Map<String, String> journalEntry = new HashMap<>();
+            Map<String, String> journalEntry = new HashMap<>(); //Die HashMap wird benötigt um den Journal-Eintrag zum dazugehörigen Datum zu speichern
             journalEntry.put("text", journalText);
 
             journalDbReference.child(dateKey).setValue(journalEntry)
@@ -165,11 +166,11 @@ public class JournalActivity extends AppCompatActivity {
                     )
                     .addOnFailureListener(e ->
                             Toast.makeText(JournalActivity.this, "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show()
-                    );
+                    );  //Eintrag wird zum ausgewählten Datum in DB gespeichert
         }
 
         private void loadJournalForDate(String dateKey){
-            currentDateTitle.setText(dateKey); // Update title to show chosen date
+            currentDateTitle.setText(dateKey);
             journalDbReference.child(dateKey).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot snapshot) {
@@ -187,12 +188,13 @@ public class JournalActivity extends AppCompatActivity {
                     Log.e("JournalActivity", "Failed to load journal for date: " + dateKey, error.toException());
                 }
             });
-        }
+        }   //Ähnliche methode zu loadTodaysJournal(), nur für den aus dem Datepicker ausgewählten Datum
 
         private void deleteEntry()
         {
             if(selectedDate == null) {
-                selectedDate = java.time.LocalDate.now().toString();}
+                selectedDate = java.time.LocalDate.now().toString();
+            }   //Wenn kein Datum ausgewählt wird wird das aktuelle Datum geladen
 
             String dateKey = selectedDate;
 
@@ -200,12 +202,14 @@ public class JournalActivity extends AppCompatActivity {
                     .addOnSuccessListener(unused -> {
                         journalEditText.setText("");
                         Toast.makeText(JournalActivity.this, "Journal entry deleted", Toast.LENGTH_SHORT).show();
-                    })
+                    }) //Löschen des Text für das ausgewählte Datum
                     .addOnFailureListener(e ->
                             Toast.makeText(JournalActivity.this, "Failed to delete: " + e.getMessage(), Toast.LENGTH_SHORT).show()
                     );
         }
 
+
+        //Hier folgt die Toolbar navigation zwischen den Screens, welche auf allen Screens außer Main angezeigt wird
     private void showMenu(View popUp){
         PopupMenu popupMenu = new PopupMenu(JournalActivity.this, popUp);
         popupMenu.getMenuInflater().inflate(R.menu.popupmenu, popupMenu.getMenu());

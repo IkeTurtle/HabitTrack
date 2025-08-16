@@ -32,7 +32,6 @@ public class RegisterActivity extends AppCompatActivity {
     ProgressBar progressBar;
     TextView textViewReminder;
 
-    //Referenz zu Login etc. Funktionen: https://www.youtube.com/watch?v=QAKq8UBv4GI
 
     @Override
     public void onStart() {
@@ -43,7 +42,7 @@ public class RegisterActivity extends AppCompatActivity {
             startActivity(intent);
             finish();
         } //Siehe: https://firebase.google.com/docs/auth/android/password-auth?hl=de#java_2
-    }
+    } //Bei erfolgtem Login wird man zur Main activity verlinked
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,7 +64,7 @@ public class RegisterActivity extends AppCompatActivity {
                     startActivity(intent);
                     finish();
                 }
-            });
+            });  //Verlinkung zum Login, falls man sich nicht registrieren möchte
 
             buttonRegister.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -96,18 +95,12 @@ public class RegisterActivity extends AppCompatActivity {
                                         startActivity(intent);
                                         finish();
                                     } else {
-                                        // If sign in fails, display a message to the user.
                                         Toast.makeText(RegisterActivity.this, "Registration failed.", Toast.LENGTH_SHORT).show();
-
                                     }
                                 }
                             });  //Siehe https://firebase.google.com/docs/auth/android/password-auth?hl=de#java_2
                 }
-
-
             }
-
-
             );
 
     }

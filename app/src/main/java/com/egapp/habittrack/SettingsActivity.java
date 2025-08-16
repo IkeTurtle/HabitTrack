@@ -55,10 +55,10 @@ public class SettingsActivity extends AppCompatActivity {
             Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
             startActivity(intent);
             finish();
-        }
+        }   //Bei fehlendem Nutzer wird man zum Login redirected
         else{
             textViewUserNameSettings.setText(user.getEmail());
-        }
+        }   //Textview zeigt Nutzeremail
 
         backIcon.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -101,20 +101,20 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     private void ResetPassword() {
-        progressBarChange.setVisibility(View.VISIBLE);
+        progressBarChange.setVisibility(View.VISIBLE);  //Progressbar bei Versendung der Reset-Email
 
-        sAuth.sendPasswordResetEmail(userString)
+        sAuth.sendPasswordResetEmail(userString)    //Von Firebase zur Verfügung gestellte Reset password utility
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void unused) {
                         Toast.makeText(SettingsActivity.this, "Reset Password Link has been Send to your E-Mail, you will be logged out now.", Toast.LENGTH_SHORT).show();
                         try {
-                            TimeUnit.SECONDS.sleep(1);
+                            TimeUnit.SECONDS.sleep(1); //Kurzer Timer damit sich die Toasts nicht überlappen
                         } catch (InterruptedException e) {
                             throw new RuntimeException(e);
                         }
                         Toast.makeText(SettingsActivity.this, "Make sure to check your Junk Folder!", Toast.LENGTH_SHORT).show();
-                        FirebaseAuth.getInstance().signOut();
+                        FirebaseAuth.getInstance().signOut(); //Nach Anforderung des Links wird der Nutzer ausgeloggt
                         Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
                         startActivity(intent);
                         finish();
@@ -129,6 +129,8 @@ public class SettingsActivity extends AppCompatActivity {
                 });
 
     }
+
+    //Hier folgt die Toolbar navigation zwischen den Screens, welche auf allen Screens außer Main angezeigt wird
     private void showMenu(View popUp){
         PopupMenu popupMenu = new PopupMenu(SettingsActivity.this, popUp);
         popupMenu.getMenuInflater().inflate(R.menu.popupmenu, popupMenu.getMenu());

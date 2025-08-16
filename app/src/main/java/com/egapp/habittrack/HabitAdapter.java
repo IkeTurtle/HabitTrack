@@ -20,6 +20,9 @@ import java.util.List;
 
 public class HabitAdapter extends RecyclerView.Adapter<HabitAdapter.HabitViewHolder> {
 
+    //Es werden für jeden Screen der einen RecyclerView mit individuellen Daten aus der DB mit jeweils verschiedenen Anzeigeoptionen anzeigt ein Adapter benötigt.
+    //Für dieses Projekt gibt es drei Adapter für drei RecyclerViews
+
     Context context;
     List<Habit> habitList;
 
@@ -45,7 +48,7 @@ public class HabitAdapter extends RecyclerView.Adapter<HabitAdapter.HabitViewHol
             builder.setTitle("Edit or Delete Habit");
             String[] options = {"Edit", "Delete"};
             builder.setItems(options, (dialog, which) -> {
-                if (which == 0) { // Edit
+                if (which == 0) { //Hier wird die Logik für den Add Button geregelt
                     AlertDialog.Builder editDialog = new AlertDialog.Builder(context);
                     editDialog.setTitle("Edit Habit");
 
@@ -70,7 +73,7 @@ public class HabitAdapter extends RecyclerView.Adapter<HabitAdapter.HabitViewHol
                     editDialog.setNegativeButton("Cancel", null);
                     editDialog.show();
 
-                } else if (which == 1) { // Delete
+                } else if (which == 1) { //Hier wird die Logik für den DeleteButton geregelt
                     FirebaseDatabase.getInstance().getReference("Users")
                             .child(FirebaseAuth.getInstance().getCurrentUser().getUid())
                             .child("habits")

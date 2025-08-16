@@ -69,10 +69,10 @@ public class HabitManagementActivity extends AppCompatActivity {
                     .getReference("Users")
                     .child(uid)
                     .child("habits");}
+        // Wenn der Nutzer nicht leer ist (eingeloggt) werden hier die Daten zur aktuellen User-ID geladen
 
 
-
-        loadHabits();
+        loadHabits();   //Hier werden die Habits aus der Datenbank geladen und im Recyclerview angezeigt
 
         addHabit.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -113,7 +113,7 @@ public class HabitManagementActivity extends AppCompatActivity {
             habitManagementDbReference.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot snapshot) {
-                    habitList.clear();
+                    habitList.clear(); //Liste wird beim Laden geleert, sodass die Liste keine Dopplungen hat
                     for (DataSnapshot habitSnapshot : snapshot.getChildren()) {
                         Habit habit = habitSnapshot.getValue(Habit.class);
                         if (habit != null) {
@@ -121,8 +121,8 @@ public class HabitManagementActivity extends AppCompatActivity {
                             habitList.add(habit);
                         }
                     }
-                    Collections.sort(habitList, (h1, h2) -> h1.getName().compareToIgnoreCase(h2.getName()));
-                    adapter.notifyDataSetChanged();
+                    Collections.sort(habitList, (h1, h2) -> h1.getName().compareToIgnoreCase(h2.getName())); //Sortierung der Liste
+                    adapter.notifyDataSetChanged(); //Der Adapter kümmert sich darum, dass die Daten aus der DB in der Liste angezeigt werden können
                 }
 
                 @Override
@@ -137,18 +137,18 @@ public class HabitManagementActivity extends AppCompatActivity {
         String habitName = newHabitText.getText().toString().trim();
 
          if (habitManagementDbReference != null) {
-                String id = UUID.randomUUID().toString(); // unique ID for each habit
+                String id = UUID.randomUUID().toString(); //Jeder Habit bekommt eine eigene ID, um später besser Attribute für individuelle Habits auswerten zu können
                 Habit habit = new Habit(id, habitName, false, "");
                 habitManagementDbReference.child(id).setValue(habit)
                         .addOnSuccessListener(aVoid -> {
                             Toast.makeText(this, "Habit added", Toast.LENGTH_SHORT).show();
                             newHabitText.setText("");
-                        })
+                        }) //Hinzufügen des neuen Habits zur DB
                         .addOnFailureListener(e -> Toast.makeText(this, "Failed to add habit", Toast.LENGTH_SHORT).show());
             }
         }
 
-
+    //Hier folgt die Toolbar navigation zwischen den Screens, welche auf allen Screens außer Main angezeigt wird
     private void showMenu(View popUp){
         PopupMenu popupMenu = new PopupMenu(HabitManagementActivity.this, popUp);
         popupMenu.getMenuInflater().inflate(R.menu.popupmenu, popupMenu.getMenu());

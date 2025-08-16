@@ -41,7 +41,7 @@ public class HabitOverviewActivity extends AppCompatActivity {
     DatabaseReference habitOverviewDbReference;
     HabitOverviewAdapter adapterOverview;
     List<Habit> overviewHabitList;
-    String selectedDate; // yyyy-MM-dd
+    String selectedDate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,16 +68,11 @@ public class HabitOverviewActivity extends AppCompatActivity {
                     .getReference("Users")
                     .child(uid)
                     .child("habits");
-        } else {
-            Toast.makeText(this, "No authenticated user", Toast.LENGTH_SHORT).show();
-            return;
-        }
+        } // Wenn der Nutzer nicht leer ist (eingeloggt) werden hier die Daten zur aktuellen User-ID geladen
 
-        loadHabits();
+        loadHabits();   //Hier werden die Habits aus der Datenbank geladen und im Recyclerview angezeigt
 
         overviewSwapDateButton.setOnClickListener(v -> {
-            // you can reuse your existing DatePicker implementation here
-            // quick example: open date picker and when date chosen set selectedDate, overviewDate, adapter.setDate(...) and call loadHabits()
             new android.app.DatePickerDialog(
                     HabitOverviewActivity.this,
                     (view, year, month, dayOfMonth) -> {
@@ -90,7 +85,7 @@ public class HabitOverviewActivity extends AppCompatActivity {
                     Integer.parseInt(new SimpleDateFormat("MM", Locale.getDefault()).format(new Date())) - 1,
                     Integer.parseInt(new SimpleDateFormat("dd", Locale.getDefault()).format(new Date()))
             ).show();
-        });
+        }); //Datepicker bei Klick auf Button um Tasks für andere Daten als erfüllt setzen zu können
 
         backIcon.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -126,30 +121,25 @@ public class HabitOverviewActivity extends AppCompatActivity {
                         if (habit != null) {
                             habit.setId(habitSnapshot.getKey());
 
-                            // ensure completions map is initialized
                             if (habit.getCompletions() == null) {
                                 habit.setCompletions(new HashMap<>());
                             }
 
-                            // read completion state for selectedDate
                             Boolean completedForDate = habit.getCompletions().get(selectedDate);
                             if (completedForDate == null) {
-                                // treat as missed and write back to Firebase
                                 completedForDate = false;
                                 habit.getCompletions().put(selectedDate, false);
                                 habitOverviewDbReference.child(habit.getId()).child("completions")
                                         .child(selectedDate).setValue(false);
-                            }
+                            } //Hier wird eine leere Checkbox als false gesetzt um dafür zu sorgen, dass wenn ein Tag aktiv ist später in der StatisticActivity die verfehlten Habits gezählt werden können
 
                             habit.setCompleted(completedForDate);
                             overviewHabitList.add(habit);
                         }
                     }
+                    Collections.sort(overviewHabitList, (h1, h2) -> h1.getName().compareToIgnoreCase(h2.getName())); //listensortierung
 
-                    // optional sorting
-                    Collections.sort(overviewHabitList, (h1, h2) -> h1.getName().compareToIgnoreCase(h2.getName()));
-
-                    adapterOverview.notifyDataSetChanged();
+                    adapterOverview.notifyDataSetChanged(); //Adapter der sich um die Anzeige der Daten in der Liste kümmert
                 }
 
                 @Override
@@ -160,7 +150,7 @@ public class HabitOverviewActivity extends AppCompatActivity {
         }
     }
 
-
+    //Hier folgt die Toolbar navigation zwischen den Screens, welche auf allen Screens außer Main angezeigt wird
     private void showMenu(View popUp){
         PopupMenu popupMenu = new PopupMenu(HabitOverviewActivity.this, popUp);
         popupMenu.getMenuInflater().inflate(R.menu.popupmenu, popupMenu.getMenu());

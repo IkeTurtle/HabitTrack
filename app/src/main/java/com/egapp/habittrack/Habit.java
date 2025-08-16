@@ -9,6 +9,8 @@ public class Habit {
     boolean completed;
     Map<String, Boolean> completions;
 
+    //Diese Klasse definiert die Attribute der individuellen Habits. Insbesondere ist das Map Attribut wichtig um an verschiedenen Tagen/Daten zählen zu können ob ein Habit completed wurde
+    //Und nicht nur einmal. In der Statistic Activity kann damit angezeigt werden wie oft ein Habit completed oder nicht completed wurde.
 
     public Habit() {} // Wird für Firebase Anbindung gebraucht. Ohne leeren Konstruktor keine Realtime Datenanbindung möglich.
 
@@ -45,7 +47,7 @@ public class Habit {
     public void setCompleted(boolean completed) {
         this.completed = completed;
     }
-    
+
     public void setCompletions(Map<String, Boolean> completions) {
         this.completions = completions;
     }

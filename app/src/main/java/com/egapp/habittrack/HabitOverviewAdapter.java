@@ -18,9 +18,12 @@ import java.util.List;
 
 public class HabitOverviewAdapter extends RecyclerView.Adapter<HabitOverviewAdapter.HabitOverviewViewHolder> {
 
+    //Es werden für jeden Screen der einen RecyclerView mit individuellen Daten aus der DB mit jeweils verschiedenen Anzeigeoptionen anzeigt ein Adapter benötigt.
+    //Für dieses Projekt gibt es drei Adapter für drei RecyclerViews
+
     private Context context;
     private List<Habit> habitList;
-    private String date; // selected date
+    private String date;
 
     public HabitOverviewAdapter(Context context, List<Habit> habitList) {
         this.context = context;
@@ -43,9 +46,9 @@ public class HabitOverviewAdapter extends RecyclerView.Adapter<HabitOverviewAdap
         Habit habit = habitList.get(position);
 
         holder.nameText.setText(habit.getName());
-        holder.checkBox.setOnCheckedChangeListener(null); // reset listener before reusing
+        holder.checkBox.setOnCheckedChangeListener(null);
 
-        holder.checkBox.setChecked(habit.isCompleted());
+        holder.checkBox.setChecked(habit.isCompleted()); //Anzeige der Checkboxes
 
         holder.checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
             habit.setCompleted(isChecked);

@@ -31,7 +31,6 @@ public class LoginActivity extends AppCompatActivity {
     ProgressBar progressBar;
     TextView textViewReminder;
 
-    //Referenz zu Login etc. Funktionen: https://www.youtube.com/watch?v=QAKq8UBv4GI
 
     @Override
     public void onStart() {
@@ -42,7 +41,7 @@ public class LoginActivity extends AppCompatActivity {
             startActivity(intent);
             finish();
         } //Siehe: https://firebase.google.com/docs/auth/android/password-auth?hl=de#java_2
-    }
+    }   //Bei erfolgtem Login wird man zur Main activity verlinked
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,7 +63,7 @@ public class LoginActivity extends AppCompatActivity {
                     startActivity(intent);
                     finish();
                 }
-            });
+            });  //Bei Klick auf diesem Textview gelangt man zum Register-Screen
 
             buttonLogin.setOnClickListener(new View.OnClickListener() {
                 @Override
