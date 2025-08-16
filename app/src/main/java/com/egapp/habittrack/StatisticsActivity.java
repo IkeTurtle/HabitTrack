@@ -98,7 +98,7 @@ public class StatisticsActivity extends AppCompatActivity {
         });
     }
 
-    //Hier folgt die Toolbar navigation zwischen den Screens, welche auf allen Screens außer Main angezeigt wird
+
     private void loadHabits() {
         if (statisticsDbReference != null) {
             statisticsDbReference.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -108,32 +108,30 @@ public class StatisticsActivity extends AppCompatActivity {
                     for (DataSnapshot habitSnapshot : snapshot.getChildren()) {
                         Habit habit = habitSnapshot.getValue(Habit.class);
                         if (habit != null) {
-                            // ensure id is set (used for updates)
                             habit.setId(habitSnapshot.getKey());
+                            //individuelle IDs für jeden einzelnen Task/Tag
 
-                            // ensure completions map is initialized
                             if (habit.getCompletions() == null) {
                                 habit.setCompletions(new HashMap<>());
-                            }
+                            } //HashMap um individuelle Habits mit den completions zu verknüpfen
 
-                            // read completion state for selectedDate
+                            //Hier wird abgefragt ob ein Habit als completed markiert wurde
                             Boolean completedForDate = habit.getCompletions().get(selectedDate);
                             if (completedForDate == null) {
-                                // If no entry exists, treat as missed (false) and store it
+                                //Wenn kein Eintrag besteht wird er false gesetzt um ihn zählen zu können
                                 completedForDate = false;
                                 habit.getCompletions().put(selectedDate, false);
                             }
 
                             habit.setCompleted(completedForDate);
-
                             statisticsHabitList.add(habit);
                         }
                     }
 
                     Collections.sort(statisticsHabitList, (h1, h2) -> h1.getName().compareToIgnoreCase(h2.getName()));
-                    statisticsAdapter.notifyDataSetChanged();
+                    statisticsAdapter.notifyDataSetChanged();  //Adapter wird über die Datenänderung informiert
 
-                    updateStreak();
+                    updateStreak();  //bei erneutem laden/updates der Seite wird auch die Streak anzeige refreshed
                 }
 
                 @Override
