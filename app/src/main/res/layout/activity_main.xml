@@ -25,38 +25,45 @@
         android:layout_height="wrap_content"
         android:gravity="top"
         android:text="User"
+        android:layout_marginTop="8dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
         android:textSize="34sp"
         android:textStyle="italic" />
 
     <Button
-        android:layout_width="wrap_content"
+        android:layout_width="200dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         android:text="@string/daily_habits"
         android:id="@+id/home_dailyHabitsButton" />
     <Button
-        android:layout_width="wrap_content"
+        android:layout_width="200dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         android:text="@string/journal"
         android:id="@+id/home_journalButton" />
     <Button
-        android:layout_width="wrap_content"
+        android:layout_width="200dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         android:text="@string/habit_management"
         android:id="@+id/home_habitManagementButton" />
     <Button
-        android:layout_width="wrap_content"
+        android:layout_width="200dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         android:text="@string/statistics"
         android:id="@+id/home_statisticsButton" />
     <Button
-        android:layout_width="wrap_content"
+        android:layout_width="200dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         android:text="@string/settings"
         android:id="@+id/home_settingsButton" />
     <Button
-        android:layout_width="wrap_content"
+        android:layout_width="200dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         android:text="@string/logout"
         android:id="@+id/logout" />
 

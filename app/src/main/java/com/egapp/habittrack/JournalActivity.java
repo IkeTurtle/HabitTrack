@@ -61,7 +61,6 @@ public class JournalActivity extends AppCompatActivity {
 
         if (user != null) {
             String uid = user.getUid();
-            //String journalText = journalEditText.getText().toString().trim();
 
             journalDbReference = FirebaseDatabase.getInstance()
                     .getReference("Users")
