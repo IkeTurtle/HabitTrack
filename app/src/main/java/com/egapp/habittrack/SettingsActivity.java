@@ -2,21 +2,39 @@ package com.egapp.habittrack;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
+import java.util.concurrent.TimeUnit;
+
 public class SettingsActivity extends AppCompatActivity {
 
 
-
+    Button buttonPasswordChange;
+    FirebaseAuth sAuth;
+    ProgressBar progressBarChange;
+    TextView textViewUserNameSettings;
+    FirebaseUser user;
+    String userString;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,8 +42,23 @@ public class SettingsActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_settings);
 
+        sAuth = FirebaseAuth.getInstance();
         ImageView backIcon = findViewById(R.id.back_icon);
         ImageView menuIcon = findViewById(R.id.menu_icon);
+        buttonPasswordChange = findViewById(R.id.settings_changePwButton);
+        textViewUserNameSettings = findViewById(R.id.user_details_settings);
+        progressBarChange = findViewById(R.id.progressBarChange);
+        user = sAuth.getCurrentUser();
+
+
+        if(user == null){
+            Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+            startActivity(intent);
+            finish();
+        }
+        else{
+            textViewUserNameSettings.setText(user.getEmail());
+        }
 
         backIcon.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -43,7 +76,17 @@ public class SettingsActivity extends AppCompatActivity {
             }
         });  //Menu Icon Popup
 
-
+        buttonPasswordChange.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                userString = textViewUserNameSettings.getText().toString();
+                if(!TextUtils.isEmpty(userString)){
+                    ResetPassword();
+                }else{
+                    Toast.makeText(SettingsActivity.this, "Error when trying to find E-Mail", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
 
 
 
@@ -57,6 +100,35 @@ public class SettingsActivity extends AppCompatActivity {
         });
     }
 
+    private void ResetPassword() {
+        progressBarChange.setVisibility(View.VISIBLE);
+
+        sAuth.sendPasswordResetEmail(userString)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void unused) {
+                        Toast.makeText(SettingsActivity.this, "Reset Password Link has been Send to your E-Mail, you will be logged out now.", Toast.LENGTH_SHORT).show();
+                        try {
+                            TimeUnit.SECONDS.sleep(1);
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
+                        Toast.makeText(SettingsActivity.this, "Make sure to check your Junk Folder!", Toast.LENGTH_SHORT).show();
+                        FirebaseAuth.getInstance().signOut();
+                        Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+                        startActivity(intent);
+                        finish();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(SettingsActivity.this, "Error. Password can't be changed at the current moment.", Toast.LENGTH_SHORT).show();
+                        progressBarChange.setVisibility(View.INVISIBLE);
+                    }
+                });
+
+    }
     private void showMenu(View popUp){
         PopupMenu popupMenu = new PopupMenu(SettingsActivity.this, popUp);
         popupMenu.getMenuInflater().inflate(R.menu.popupmenu, popupMenu.getMenu());
