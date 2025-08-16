@@ -1,11 +1,17 @@
 package com.egapp.habittrack;
 
+import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -13,7 +19,26 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+
 public class JournalActivity extends AppCompatActivity {
+
+    EditText journalEditText;
+    Button saveButton,viewAllButton, deleteButton;
+    DatabaseReference journalDbReference;
+    TextView currentDateTitle;
+    String selectedDate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,6 +48,63 @@ public class JournalActivity extends AppCompatActivity {
 
         ImageView backIcon = findViewById(R.id.back_icon);
         ImageView menuIcon = findViewById(R.id.menu_icon);
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        journalDbReference = FirebaseDatabase.getInstance().getReference();
+        saveButton = findViewById(R.id.saveJournalButton);
+        viewAllButton = findViewById(R.id.viewAllJournalsButton);
+        journalEditText = findViewById(R.id.journalText);
+        currentDateTitle = findViewById(R.id.journalCurrentDate);
+        deleteButton = findViewById((R.id.deleteJourneyEntry));
+
+
+
+
+        if (user != null) {
+            String uid = user.getUid();
+            //String journalText = journalEditText.getText().toString().trim();
+
+            journalDbReference = FirebaseDatabase.getInstance()
+                    .getReference("Users")
+                    .child(uid)
+                    .child("journalEntries");}
+
+
+
+            loadTodaysJournal();
+
+        saveButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                  saveJournal();
+                  Toast.makeText(JournalActivity.this, "Journal entry saved", Toast.LENGTH_SHORT).show();
+                }
+        });
+
+        viewAllButton.setOnClickListener((new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Calendar calendar = Calendar.getInstance();
+                DatePickerDialog datePicker = new DatePickerDialog(
+                        JournalActivity.this,
+                        (dateView, year, month, dayOfMonth) -> {
+                            selectedDate = String.format(Locale.getDefault(), "%04d-%02d-%02d", year, month + 1, dayOfMonth);
+                            loadJournalForDate(selectedDate);
+                        },
+                        calendar.get(Calendar.YEAR),
+                        calendar.get(Calendar.MONTH),
+                        calendar.get(Calendar.DAY_OF_MONTH)
+                );
+                datePicker.show();
+            }
+        }));
+
+        deleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                deleteEntry();
+            }
+        });
+
 
         backIcon.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -47,6 +129,83 @@ public class JournalActivity extends AppCompatActivity {
             return insets;
         });
     }
+
+
+    private void loadTodaysJournal() {
+        String dateKey = java.time.LocalDate.now().toString();
+        currentDateTitle.setText(dateKey);
+        journalDbReference.child(dateKey).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    String text = snapshot.child("text").getValue(String.class);
+                    journalEditText.setText(text);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                Log.e("JournalActivity", "Failed to load today's journal", error.toException());
+            }
+        });
+    }
+        private void saveJournal() {
+            String journalText = journalEditText.getText().toString().trim();
+            if (journalText.isEmpty()) {
+                Toast.makeText(this, "Please write something first.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            String dateKey = (selectedDate != null) ? selectedDate : java.time.LocalDate.now().toString();
+            Map<String, String> journalEntry = new HashMap<>();
+            journalEntry.put("text", journalText);
+
+            journalDbReference.child(dateKey).setValue(journalEntry)
+                    .addOnSuccessListener(unused ->
+                            Toast.makeText(JournalActivity.this, "Journal saved!", Toast.LENGTH_SHORT).show()
+                    )
+                    .addOnFailureListener(e ->
+                            Toast.makeText(JournalActivity.this, "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+                    );
+        }
+
+        private void loadJournalForDate(String dateKey){
+            currentDateTitle.setText(dateKey); // Update title to show chosen date
+            journalDbReference.child(dateKey).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        String text = snapshot.child("text").getValue(String.class);
+                        journalEditText.setText(text);
+                    } else {
+                        journalEditText.setText(""); // No entry yet, allow creating a new one
+                        Toast.makeText(JournalActivity.this, "No entry for this date. You can create one now.", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError error) {
+                    Log.e("JournalActivity", "Failed to load journal for date: " + dateKey, error.toException());
+                }
+            });
+        }
+
+        private void deleteEntry()
+        {
+            if(selectedDate == null) {
+                selectedDate = java.time.LocalDate.now().toString();}
+
+            String dateKey = selectedDate;
+
+            journalDbReference.child(dateKey).removeValue()
+                    .addOnSuccessListener(unused -> {
+                        journalEditText.setText("");
+                        Toast.makeText(JournalActivity.this, "Journal entry deleted", Toast.LENGTH_SHORT).show();
+                    })
+                    .addOnFailureListener(e ->
+                            Toast.makeText(JournalActivity.this, "Failed to delete: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+                    );
+        }
 
     private void showMenu(View popUp){
         PopupMenu popupMenu = new PopupMenu(JournalActivity.this, popUp);

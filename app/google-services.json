@@ -2,7 +2,8 @@
   "project_info": {
     "project_number": "621769593005",
     "project_id": "habittrack-7a7d2",
-    "storage_bucket": "habittrack-7a7d2.firebasestorage.app"
+    "storage_bucket": "habittrack-7a7d2.firebasestorage.app",
+    "firebase_url": "https://habittrack-7a7d2-default-rtdb.europe-west1.firebasedatabase.app"
   },
   "client": [
     {
