@@ -10,4 +10,9 @@
     <string name="click_to_register">click to register</string>
     <string name="logout">Logout</string>
     <string name="back_to_login">back to login</string>
+    <string name="settings">Settings</string>
+    <string name="daily_habits">Daily Habits</string>
+    <string name="journal">Journal</string>
+    <string name="habit_management">Habit management</string>
+    <string name="statistics">Statistics</string>
 </resources>

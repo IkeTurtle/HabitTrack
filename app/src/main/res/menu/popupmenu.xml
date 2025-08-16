@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<item
+    android:title="Home"
+    android:id="@+id/popUp_home"/>
+    <item
+        android:title="Daily Habits"
+        android:id="@+id/popUp_dailyHabits"/>
+    <item
+        android:title="Journal"
+        android:id="@+id/popUp_Journal"/>
+    <item
+        android:title="Habit Management"
+        android:id="@+id/popUp_habitManagement"/>
+    <item
+        android:title="Statistics"
+        android:id="@+id/popUp_statistics"/>
+    <item
+        android:title="Settings"
+        android:id="@+id/popUp_settings"/>
+</menu>

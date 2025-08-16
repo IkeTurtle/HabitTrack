@@ -31,6 +31,8 @@ public class LoginActivity extends AppCompatActivity {
     ProgressBar progressBar;
     TextView textViewReminder;
 
+    //Referenz zu Login etc. Funktionen: https://www.youtube.com/watch?v=QAKq8UBv4GI
+
     @Override
     public void onStart() {
         super.onStart();

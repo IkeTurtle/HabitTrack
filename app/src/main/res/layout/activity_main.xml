@@ -10,16 +10,50 @@
     tools:context=".MainActivity">
 
 
+    <TextView
+        android:id="@+id/home_welcomeTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="top"
+        android:text="Welcome to HabitTrack!"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        android:textSize="34sp"
+        android:textStyle="bold" />
+    <TextView
+        android:id="@+id/user_details"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="top"
+        android:text="User"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        android:textSize="34sp"
+        android:textStyle="italic" />
 
-        <TextView
-            android:id="@+id/user_details"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="HabitTrack"
-            android:textAppearance="@style/TextAppearance.AppCompat.Large"
-            android:textSize="34sp"
-            android:textStyle="bold"
-/>
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/daily_habits"
+        android:id="@+id/home_dailyHabitsButton" />
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/journal"
+        android:id="@+id/home_journalButton" />
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/habit_management"
+        android:id="@+id/home_habitManagementButton" />
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/statistics"
+        android:id="@+id/home_statisticsButton" />
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/settings"
+        android:id="@+id/home_settingsButton" />
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
