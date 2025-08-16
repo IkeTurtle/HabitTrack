@@ -1,0 +1,29 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="12dp">
+
+    <TextView
+        android:id="@+id/habitNameStats"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Habit Name"
+        android:textSize="20sp"
+        android:textStyle="bold"/>
+
+    <TextView
+        android:id="@+id/habitCompletions"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Completed: 0"
+        android:textSize="16sp"/>
+
+    <TextView
+        android:id="@+id/habitMisses"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Missed: 0"
+        android:textSize="16sp"/>
+
+</LinearLayout>

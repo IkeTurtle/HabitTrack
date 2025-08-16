@@ -6,14 +6,41 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+
 
 public class StatisticsActivity extends AppCompatActivity {
+
+    TextView statisticsTitle, streakTitle;
+    RecyclerView statisticsRecyclerView;
+    DatabaseReference statisticsDbReference;
+    List<Habit> statisticsHabitList;
+    String selectedDate;
+    StatisticsAdapter statisticsAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,6 +50,31 @@ public class StatisticsActivity extends AppCompatActivity {
 
         ImageView backIcon = findViewById(R.id.back_icon);
         ImageView menuIcon = findViewById(R.id.menu_icon);
+        statisticsTitle =findViewById(R.id.statisticsTitle);
+        streakTitle = findViewById(R.id.streakTextView);
+        statisticsRecyclerView = findViewById(R.id.statisticsRecyclerView);
+        statisticsDbReference = FirebaseDatabase.getInstance().getReference();
+        statisticsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        statisticsHabitList = new ArrayList<>();
+        selectedDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+
+
+        statisticsAdapter = new StatisticsAdapter(this, statisticsHabitList);
+        statisticsRecyclerView.setAdapter(statisticsAdapter);
+
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+            statisticsDbReference = FirebaseDatabase.getInstance()
+                    .getReference("Users")
+                    .child(uid)
+                    .child("habits");
+        } else {
+            Toast.makeText(this, "No authenticated user", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        loadHabits();
+
 
         backIcon.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -46,6 +98,110 @@ public class StatisticsActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+    }
+
+
+    private void loadHabits() {
+        if (statisticsDbReference != null) {
+            statisticsDbReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot snapshot) {
+                    statisticsHabitList.clear();
+                    for (DataSnapshot habitSnapshot : snapshot.getChildren()) {
+                        Habit habit = habitSnapshot.getValue(Habit.class);
+                        if (habit != null) {
+                            // ensure id is set (used for updates)
+                            habit.setId(habitSnapshot.getKey());
+
+                            // ensure completions map is initialized
+                            if (habit.getCompletions() == null) {
+                                habit.setCompletions(new HashMap<>());
+                            }
+
+                            // read completion state for selectedDate
+                            Boolean completedForDate = habit.getCompletions().get(selectedDate);
+                            if (completedForDate == null) {
+                                // If no entry exists, treat as missed (false) and store it
+                                completedForDate = false;
+                                habit.getCompletions().put(selectedDate, false);
+                            }
+
+                            habit.setCompleted(completedForDate);
+
+                            statisticsHabitList.add(habit);
+                        }
+                    }
+
+                    Collections.sort(statisticsHabitList, (h1, h2) -> h1.getName().compareToIgnoreCase(h2.getName()));
+                    statisticsAdapter.notifyDataSetChanged();
+
+                    updateStreak();
+                }
+
+                @Override
+                public void onCancelled(DatabaseError error) {
+                    Toast.makeText(StatisticsActivity.this, "Failed to load habits", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+    }
+
+    private void updateStreak() {
+        if (statisticsHabitList.isEmpty()) {
+            streakTitle.setText("Streak: 0 days");
+            return;
+        }
+
+        // 1. Collect all dates where all habits were completed
+        List<String> completedDates = new ArrayList<>();
+        for (Habit habit : statisticsHabitList) {
+            if (habit.getCompletions() != null) {
+                for (String date : habit.getCompletions().keySet()) {
+                    if (habit.getCompletions().get(date)) {
+                        if (!completedDates.contains(date)) {
+                            completedDates.add(date);
+                        }
+                    }
+                }
+            }
+        }
+
+        // 2. Sort dates descending
+        Collections.sort(completedDates, Collections.reverseOrder());
+
+        // 3. Count consecutive days starting from today
+        int streak = 0;
+        String today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+        Date currentDate = null;
+
+        try {
+            currentDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(today);
+        } catch (Exception e) {
+            e.printStackTrace();
+            streakTitle.setText("Streak: 0 days");
+            return;
+        }
+
+        while (true) {
+            String dateStr = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(currentDate);
+
+            boolean allCompleted = true;
+            for (Habit habit : statisticsHabitList) {
+                if (habit.getCompletions() == null || habit.getCompletions().get(dateStr) == null || !habit.getCompletions().get(dateStr)) {
+                    allCompleted = false;
+                    break;
+                }
+            }
+
+            if (!allCompleted) break;
+
+            streak++;
+            // go to previous day
+            long millis = currentDate.getTime();
+            currentDate = new Date(millis - 24 * 60 * 60 * 1000);
+        }
+
+        streakTitle.setText("Streak: " + streak + " days");
     }
 
     private void showMenu(View popUp){

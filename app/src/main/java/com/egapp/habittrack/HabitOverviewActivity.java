@@ -29,6 +29,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -53,25 +54,14 @@ public class HabitOverviewActivity extends AppCompatActivity {
         overviewDate = findViewById(R.id.overviewCurrentDate);
         overviewRecycler = findViewById(R.id.overviewRecyclerView);
         overviewSwapDateButton = findViewById(R.id.overviewDifferentDateButton);
-
-        // set layout manager (this was missing)
         overviewRecycler.setLayoutManager(new LinearLayoutManager(this));
-
-        // create adapter + list
         overviewHabitList = new ArrayList<>();
         adapterOverview = new HabitOverviewAdapter(this, overviewHabitList);
-
-        // set adapter to recycler
         overviewRecycler.setAdapter(adapterOverview);
-
-        // selected date defaults to today in yyyy-MM-dd
         selectedDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
         overviewDate.setText(selectedDate);
-
-        // give the adapter the date so its checkbox updates will write to completions/{date}
         adapterOverview.setDate(selectedDate);
 
-        // set DB reference for current user (guard for null user)
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
             habitOverviewDbReference = FirebaseDatabase.getInstance()
@@ -83,10 +73,8 @@ public class HabitOverviewActivity extends AppCompatActivity {
             return;
         }
 
-        // load habits (also sets habit.completed by reading completions/{selectedDate})
         loadHabits();
 
-        // optional: show date picker to change selectedDate
         overviewSwapDateButton.setOnClickListener(v -> {
             // you can reuse your existing DatePicker implementation here
             // quick example: open date picker and when date chosen set selectedDate, overviewDate, adapter.setDate(...) and call loadHabits()
@@ -136,23 +124,31 @@ public class HabitOverviewActivity extends AppCompatActivity {
                     for (DataSnapshot habitSnapshot : snapshot.getChildren()) {
                         Habit habit = habitSnapshot.getValue(Habit.class);
                         if (habit != null) {
-                            // ensure id is set (used for updates)
                             habit.setId(habitSnapshot.getKey());
 
-                            // read completion state for selectedDate (may be null)
-                            Boolean completedForDate = null;
-                            if (habitSnapshot.child("completions").child(selectedDate).exists()) {
-                                completedForDate = habitSnapshot.child("completions").child(selectedDate).getValue(Boolean.class);
+                            // ensure completions map is initialized
+                            if (habit.getCompletions() == null) {
+                                habit.setCompletions(new HashMap<>());
                             }
-                            habit.setCompleted(completedForDate != null && completedForDate);
 
+                            // read completion state for selectedDate
+                            Boolean completedForDate = habit.getCompletions().get(selectedDate);
+                            if (completedForDate == null) {
+                                // treat as missed and write back to Firebase
+                                completedForDate = false;
+                                habit.getCompletions().put(selectedDate, false);
+                                habitOverviewDbReference.child(habit.getId()).child("completions")
+                                        .child(selectedDate).setValue(false);
+                            }
+
+                            habit.setCompleted(completedForDate);
                             overviewHabitList.add(habit);
                         }
                     }
+
                     // optional sorting
                     Collections.sort(overviewHabitList, (h1, h2) -> h1.getName().compareToIgnoreCase(h2.getName()));
 
-                    // notify adapter
                     adapterOverview.notifyDataSetChanged();
                 }
 
@@ -163,6 +159,7 @@ public class HabitOverviewActivity extends AppCompatActivity {
             });
         }
     }
+
 
     private void showMenu(View popUp){
         PopupMenu popupMenu = new PopupMenu(HabitOverviewActivity.this, popUp);
